@@ -12,23 +12,31 @@ namespace NunitSample.PageObjects
     public class ElementsPage
     {
         private IWebDriver driver;
+        IJavaScriptExecutor js;
+        //pageobject modeling
         private IWebElement userName => driver.FindElement(By.Id("userName"));
         private IWebElement userEmail => driver.FindElement(By.Id("userEmail"));
         private IWebElement currentAdd => driver.FindElement(By.Id("currentAddress"));
         private IWebElement perAdd => driver.FindElement(By.Id("permanentAddress"));
         private IWebElement Submit => driver.FindElement(By.Id("submit"));
-
+        //PageFactory
+        [FindsBy(How = How.XPath, Using = "//button[@title='Toggle']")]
+        private IWebElement checkBOxEle;
+        [FindsBy(How = How.XPath, Using = "//span[@class='rct-title' and contains(text(),'Desktop')]")]
+        private IWebElement checkBoxSelect;
+        [FindsBy(How= How.XPath,Using = "//span[@class='text-success']")]
+        private IList<IWebElement> checkList;
         public ElementsPage(IWebDriver driver)
         {
             this.driver = driver;
             PageFactory.InitElements(driver, this);
+            js = (IJavaScriptExecutor)driver;
         }
 
         public void NavigateToElementType(string eleType)
         {
             IWebElement elements = driver.FindElement(By.XPath("//span[@class='text' and contains(text(),'" + eleType + "')]"));
-            var js1 = (IJavaScriptExecutor)driver;
-            js1.ExecuteScript("arguments[0].scrollIntoView(true)", elements);
+            js.ExecuteScript("arguments[0].scrollIntoView(true)", elements);
             elements.Click();
         }
 
@@ -49,6 +57,25 @@ namespace NunitSample.PageObjects
         public string TextBoxInfoVerification(string userName)
         {
             return driver.FindElement(By.Id("name")).Text;
+        }
+        
+        public void CheckBoxSelection(List<string> selectCategory)
+        {
+            checkBOxEle.Click();
+            js.ExecuteScript("arguments[0].scrollIntoView(true)", checkBoxSelect);
+            checkBoxSelect.Click();
+
+            foreach (IWebElement category in checkList)
+            {
+                if (selectCategory.Contains(category.Text))
+                {
+                    Console.WriteLine("Categories Selected");
+                }
+                else
+                {
+                    Console.WriteLine("Categories not Selected");
+                }
+            }
         }
     }
 }
